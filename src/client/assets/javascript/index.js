@@ -75,21 +75,29 @@ async function delay(ms) {
 // This async function controls the flow of the race, add the logic and error handling
 async function handleCreateRace() {
 	// render starting UI
-	renderAt('#race', renderRaceStartView())
+	const tracks = await getTracks()
+	const selectedTrack = tracks.find(x => x.id == store.track_id)
+	renderAt('#race', renderRaceStartView(selectedTrack))
 
 	// TODO - Get player_id and track_id from the store
+	const {track_id, player_id} = store
 	
 	// const race = TODO - invoke the API call to create the race, then save the result
+	const race = await createRace(player_id, track_id)
 
 	// TODO - update the store with the race id
 	// For the API to work properly, the race id should be race id - 1
+	store.race_id = -1
 	
 	// The race has been created, now start the countdown
 	// TODO - call the async function runCountdown
+	await runCountdown()
 
 	// TODO - call the async function startRace
+	await startRace()
 
 	// TODO - call the async function runRace
+	await runRace()
 }
 
 function runRace(raceID) {
@@ -146,6 +154,8 @@ function handleSelectPodRacer(target) {
 	target.classList.add('selected')
 
 	// TODO - save the selected racer to the store
+	store.player_id = target.id
+	console.log(store)
 }
 
 function handleSelectTrack(target) {
@@ -161,12 +171,22 @@ function handleSelectTrack(target) {
 	target.classList.add('selected')
 
 	// TODO - save the selected track id to the store
-	
+	store.track_id = target.id
+	console.log(store)
 }
 
-function handleAccelerate() {
-	console.log("accelerate button clicked")
+async function handleAccelerate() {
 	// TODO - Invoke the API call to accelerate
+	console.log("accelerate button clicked")
+	try {
+		const response = await accelerate()
+		console.log(response)
+		if (response == undefined) {
+			throw new Error("Did not accelerate as expected")
+		}
+	} catch (error) {
+		console.log(error)
+	}
 }
 
 // HTML VIEWS ------------------------------------------------
@@ -320,15 +340,25 @@ function defaultFetchOpts() {
 
 // TODO - Make a fetch call (with error handling!) to each of the following API endpoints 
 
-function getTracks() {
+async function getTracks() {
 	// GET request to `${SERVER}/api/tracks`
+	return fetch(`${SERVER}/api/tracks`, {
+		method: 'GET'
+	})
+	.then(res => res.json())
+	.catch(err => console.log("Problem with getTracks request::", err))
 }
 
-function getRacers() {
+async function getRacers() {
 	// GET request to `${SERVER}/api/cars`
+	return fetch(`${SERVER}/api/cars`, {
+		method: 'GET'
+	})
+	.then(res => res.json())
+	.catch(err => console.log("Problem with getRacers request::", err))
 }
 
-function createRace(player_id, track_id) {
+async function createRace(player_id, track_id) {
 	player_id = parseInt(player_id)
 	track_id = parseInt(track_id)
 	const body = { player_id, track_id }
@@ -343,11 +373,16 @@ function createRace(player_id, track_id) {
 	.catch(err => console.log("Problem with createRace request::", err))
 }
 
-function getRace(id) {
+async function getRace(id) {
 	// GET request to `${SERVER}/api/races/${id}`
+	return fetch(`${SERVER}/api/cars/${id}`, {
+		method: 'GET'
+	})
+	.then(res => res.json())
+	.catch(err => console.log("Problem with getRace with id request::", err))
 }
 
-function startRace(id) {
+async function startRace(id) {
 	return fetch(`${SERVER}/api/races/${id}/start`, {
 		method: 'POST',
 		...defaultFetchOpts(),
@@ -356,8 +391,15 @@ function startRace(id) {
 	.catch(err => console.log("Problem with getRace request::", err))
 }
 
-function accelerate(id) {
+async function accelerate(id) {
 	// POST request to `${SERVER}/api/races/${id}/accelerate`
 	// options parameter provided as defaultFetchOpts
 	// no body or datatype needed for this request
+
+	return fetch(`${SERVER}/api/races/${id}/accelerate`, {
+		method: 'POST',
+		...defaultFetchOpts(),
+	})
+	.then(res => res.json())
+	.catch(err => console.log("Problem with accelerate request::", err))
 }
