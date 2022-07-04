@@ -88,6 +88,7 @@ async function handleCreateRace() {
 	// TODO - update the store with the race id
 	// For the API to work properly, the race id should be race id - 1
 	store.race_id = race["ID"] - 1
+	console.log(store.race_id)
 	
 	// The race has been created, now start the countdown
 	// TODO - call the async function runCountdown
@@ -103,6 +104,22 @@ async function handleCreateRace() {
 function runRace(raceID) {
 	return new Promise(resolve => {
 	// TODO - use Javascript's built in setInterval method to get race info every 500ms
+	const raceInterval = setInterval(async () => {
+		const raceInfo = await getRace(raceID)
+		console.log(raceInfo)
+
+		// TODO - if the race info status property is "in-progress", update the leaderboard
+		if (raceInfo["status"] == "in-progress") {
+			renderAt('#leaderBoard', raceProgress(raceInfo["positions"]))
+		}
+
+		// TODO - if the race info status property is "finished", stop the interval, render the results view, and resolve the promise
+		if (raceInfo["status"] == "finished") {
+			clearInterval(raceInterval)
+			renderAt('#race', resultsView(raceInfo["positions"]))
+			resolve(raceInfo)
+		}
+	}, 500)
 
 	/* 
 		TODO - if the race info status property is "in-progress", update the leaderboard by calling:
@@ -129,21 +146,17 @@ async function runCountdown() {
 
 		return new Promise(resolve => {
 			// TODO - use Javascript's built in setInterval method to count down once per second
-			let countdown = setInterval(doCountdown, 1000, timer)
-
-			function doCountdown(timer) {
+			const countdown = setInterval(() => {
 				// run this DOM manipulation to decrement the countdown for the user
-				document.getElementById('big-numbers').innerHTML = --timer
+				timer--
+				document.getElementById('big-numbers').innerHTML = timer
 				
-				if (timer == 0) clearInterval(countdown)
-			}
-
-			// // run this DOM manipulation to decrement the countdown for the user
-			// document.getElementById('big-numbers').innerHTML = --timer
-
-			// TODO - if the countdown is done, clear the interval, resolve the promise, and return
-			// clearInterval(countdown)
-			resolve()
+				// TODO - if the countdown is done, clear the interval, resolve the promise, and return
+				if (timer == 0) {
+					clearInterval(countdown)
+					resolve()
+				}
+			}, 1000)
 		})
 	} catch(error) {
 		console.log(error);
@@ -188,7 +201,7 @@ async function handleAccelerate() {
 	// TODO - Invoke the API call to accelerate
 	console.log("accelerate button clicked")
 	try {
-		const response = await accelerate()
+		const response = await accelerate(store.race_id)
 		console.log(response)
 		if (response == undefined) {
 			throw new Error("Did not accelerate as expected")
@@ -387,7 +400,7 @@ async function createRace(player_id, track_id) {
 
 async function getRace(id) {
 	// GET request to `${SERVER}/api/races/${id}`
-	return fetch(`${SERVER}/api/cars/${id}`, {
+	return fetch(`${SERVER}/api/races/${id}`, {
 		method: 'GET'
 	})
 	.then(res => res.json())
@@ -408,6 +421,7 @@ async function accelerate(id) {
 	// options parameter provided as defaultFetchOpts
 	// no body or datatype needed for this request
 
+	console.log(id)
 	return fetch(`${SERVER}/api/races/${id}/accelerate`, {
 		method: 'POST',
 		...defaultFetchOpts(),
