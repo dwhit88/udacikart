@@ -88,7 +88,6 @@ async function handleCreateRace() {
 	// TODO - update the store with the race id
 	// For the API to work properly, the race id should be race id - 1
 	store.race_id = race["ID"] - 1
-	console.log(store.race_id)
 	
 	// The race has been created, now start the countdown
 	// TODO - call the async function runCountdown
@@ -106,7 +105,6 @@ function runRace(raceID) {
 	// TODO - use Javascript's built in setInterval method to get race info every 500ms
 	const raceInterval = setInterval(async () => {
 		const raceInfo = await getRace(raceID)
-		console.log(raceInfo)
 
 		// TODO - if the race info status property is "in-progress", update the leaderboard
 		if (raceInfo["status"] == "in-progress") {
@@ -177,7 +175,6 @@ function handleSelectPodRacer(target) {
 
 	// TODO - save the selected racer to the store
 	store.player_id = target.id
-	console.log(store)
 }
 
 function handleSelectTrack(target) {
@@ -194,7 +191,6 @@ function handleSelectTrack(target) {
 
 	// TODO - save the selected track id to the store
 	store.track_id = target.id
-	console.log(store)
 }
 
 async function handleAccelerate() {
@@ -202,7 +198,6 @@ async function handleAccelerate() {
 	console.log("accelerate button clicked")
 	try {
 		const response = await accelerate(store.race_id)
-		console.log(response)
 		if (response == undefined) {
 			throw new Error("Did not accelerate as expected")
 		}
@@ -311,10 +306,8 @@ function resultsView(positions) {
 }
 
 function raceProgress(positions) {
-	console.log(positions)
 	let userPlayer = positions.find(e => String(e.id) === store.player_id)
 	userPlayer.driver_name += " (you)"
-	// console.log(userPlayer)
 
 	positions = positions.sort((a, b) => (a.segment > b.segment) ? -1 : 1)
 	let count = 1
@@ -414,7 +407,7 @@ async function startRace(id) {
 		method: 'POST',
 		...defaultFetchOpts(),
 	})
-	.then(res => res.json())
+	.then(res => res)
 	.catch(err => console.log("Problem with getRace request::", err))
 }
 
@@ -423,11 +416,10 @@ async function accelerate(id) {
 	// options parameter provided as defaultFetchOpts
 	// no body or datatype needed for this request
 
-	console.log(id)
 	return fetch(`${SERVER}/api/races/${id}/accelerate`, {
 		method: 'POST',
 		...defaultFetchOpts(),
 	})
-	.then(res => res.json())
+	.then(res => res)
 	.catch(err => console.log("Problem with accelerate request::", err))
 }
