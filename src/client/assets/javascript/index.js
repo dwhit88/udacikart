@@ -87,17 +87,17 @@ async function handleCreateRace() {
 
 	// TODO - update the store with the race id
 	// For the API to work properly, the race id should be race id - 1
-	store.race_id = -1
+	store.race_id = race["ID"] - 1
 	
 	// The race has been created, now start the countdown
 	// TODO - call the async function runCountdown
 	await runCountdown()
 
 	// TODO - call the async function startRace
-	await startRace()
+	await startRace(store.race_id)
 
 	// TODO - call the async function runRace
-	await runRace()
+	await runRace(store.race_id)
 }
 
 function runRace(raceID) {
@@ -129,12 +129,21 @@ async function runCountdown() {
 
 		return new Promise(resolve => {
 			// TODO - use Javascript's built in setInterval method to count down once per second
+			let countdown = setInterval(doCountdown, 1000, timer)
 
-			// run this DOM manipulation to decrement the countdown for the user
-			document.getElementById('big-numbers').innerHTML = --timer
+			function doCountdown(timer) {
+				// run this DOM manipulation to decrement the countdown for the user
+				document.getElementById('big-numbers').innerHTML = --timer
+				
+				if (timer == 0) clearInterval(countdown)
+			}
+
+			// // run this DOM manipulation to decrement the countdown for the user
+			// document.getElementById('big-numbers').innerHTML = --timer
 
 			// TODO - if the countdown is done, clear the interval, resolve the promise, and return
-
+			// clearInterval(countdown)
+			resolve()
 		})
 	} catch(error) {
 		console.log(error);
@@ -333,7 +342,7 @@ function defaultFetchOpts() {
 		mode: 'cors',
 		headers: {
 			'Content-Type': 'application/json',
-			'Access-Control-Allow-Origin' : SERVER,
+			'Access-Control-Allow-Origin': SERVER,
 		},
 	}
 }
@@ -361,12 +370,15 @@ async function getRacers() {
 async function createRace(player_id, track_id) {
 	player_id = parseInt(player_id)
 	track_id = parseInt(track_id)
-	const body = { player_id, track_id }
+	const body = { 
+		"player_id": player_id, 
+		"track_id": track_id
+	}
 	
 	return fetch(`${SERVER}/api/races`, {
 		method: 'POST',
 		...defaultFetchOpts(),
-		dataType: 'jsonp',
+		dataType: 'json',
 		body: JSON.stringify(body)
 	})
 	.then(res => res.json())
