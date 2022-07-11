@@ -2,6 +2,9 @@
 
 /* -------------------  MOBILE  --------------------- */
 
+header {
+    background-image: url('https://fs-prod-cdn.nintendo-europe.com/media/images/06_screenshots/games_5/virtual_console_wii_u_3/wiiuvc_supermariokart/WiiUVC_SuperMarioKart_01.jpg');
+}
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {

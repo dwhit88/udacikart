@@ -1,7 +1,9 @@
 /* RESULTS PAGE SPECIFIC STYLES */
 
 /* -------------------  MOBILE  --------------------- */
-
+header {
+    background-image: url('https://images.squarespace-cdn.com/content/v1/533e1de9e4b02cbd82d00fbc/1399856970135-GQCKG6HBWC0F5MNSGL7A/IMG_9680.jpg?format=1000w');
+}
 
 /* -------------------  TABLET  --------------------- */
 @media (min-width: 768px) {
