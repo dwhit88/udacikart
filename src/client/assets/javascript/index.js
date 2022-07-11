@@ -102,37 +102,26 @@ async function handleCreateRace() {
 
 function runRace(raceID) {
 	return new Promise(resolve => {
-	// TODO - use Javascript's built in setInterval method to get race info every 500ms
-	const raceInterval = setInterval(async () => {
-		const raceInfo = await getRace(raceID)
+		// TODO - use Javascript's built in setInterval method to get race info every 500ms
+		const raceInterval = setInterval(async () => {
+			const raceInfo = await getRace(raceID)
+			const status = raceInfo["status"]
+			const positions = raceInfo["positions"]
 
-		// TODO - if the race info status property is "in-progress", update the leaderboard
-		if (raceInfo["status"] == "in-progress") {
-			renderAt('#leaderBoard', raceProgress(raceInfo["positions"]))
-		}
-
-		// TODO - if the race info status property is "finished", stop the interval, render the results view, and resolve the promise
-		if (raceInfo["status"] == "finished") {
-			clearInterval(raceInterval)
-			renderAt('#race', resultsView(raceInfo["positions"]))
-			resolve(raceInfo)
-		}
-	}, 500)
-
-	/* 
-		TODO - if the race info status property is "in-progress", update the leaderboard by calling:
-
-		renderAt('#leaderBoard', raceProgress(res.positions))
-	*/
-
-	/* 
-		TODO - if the race info status property is "finished", run the following:
-
-		clearInterval(raceInterval) // to stop the interval from repeating
-		renderAt('#race', resultsView(res.positions)) // to render the results view
-		reslove(res) // resolve the promise
-	*/
+			// TODO - if the race info status property is "in-progress", update the leaderboard
+			if (status == "in-progress") {
+				renderAt('#leaderBoard', raceProgress(positions))
+			} else if (status == "finished") {
+				// TODO - if the race info status property is "finished", stop the interval, render the results view, and resolve the promise
+				clearInterval(raceInterval)
+				renderAt('#race', resultsView(positions))
+				resolve(raceInfo)
+			} else {
+				throw new Error(`Cannot process race status of ${status}`)
+			}
+		}, 500)
 	})
+	.catch(error => console.log(error))
 	// remember to add error handling for the Promise
 }
 
@@ -153,9 +142,12 @@ async function runCountdown() {
 				if (timer == 0) {
 					clearInterval(countdown)
 					resolve()
+				} else if (timer < 0) {
+					throw new Error("Timer is below zero!")
 				}
 			}, 1000)
 		})
+		.catch(error => console.log(error))
 	} catch(error) {
 		console.log(error);
 	}
